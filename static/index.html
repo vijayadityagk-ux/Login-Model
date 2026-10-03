@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VaultKey | Secure Authentication &amp; 2FA System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090e17;
+      --surface: #111827;
+      --surface-subtle: #1a2336;
+      --surface-hover: #222e46;
+      --border: #26334d;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --primary-glow: rgba(59, 130, 246, 0.35);
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.15);
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.15);
+      --warning: #f59e0b;
+      --warning-bg: rgba(245, 158, 11, 0.15);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+      padding: 32px 20px 60px;
+    }
+
+    .container {
+      max-width: 1050px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* HEADER */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-icon {
+      font-size: 1.8rem;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+    .brand-text h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .brand-text h1 span { color: var(--primary); }
+    .tagline { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* NAV TABS */
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 4px;
+      border-radius: 12px;
+      width: fit-content;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 2px 8px var(--primary-glow);
+    }
+
+    /* CARDS */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .form-box {
+      max-width: 460px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-field {
+      width: 100%;
+      height: 46px;
+      padding: 0 14px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .input-field:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+      background: var(--surface);
+    }
+
+    .toggle-pass {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+
+    /* BUTTONS */
+    .btn {
+      height: 48px;
+      padding: 0 20px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 16px var(--primary-glow);
+    }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-danger {
+      background: #dc2626;
+      color: white;
+    }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-secondary {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover { background: var(--surface-hover); }
+
+    /* FEEDBACK BANNERS */
+    .banner {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .banner-danger { background: var(--danger-bg); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; }
+    .banner-success { background: var(--success-bg); border: 1px solid rgba(16, 185, 129, 0.4); color: #86efac; }
+    .banner-warning { background: var(--warning-bg); border: 1px solid rgba(245, 158, 11, 0.4); color: #fde68a; }
+
+    /* PASSWORD METER */
+    .strength-meter {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .strength-track {
+      width: 100%;
+      height: 6px;
+      background: var(--surface-subtle);
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+    .strength-bar {
+      height: 100%;
+      width: 0%;
+      transition: all 0.3s;
+    }
+    .strength-label {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* DASHBOARD PROFILE */
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 768px) {
+      .profile-grid { grid-template-columns: 1fr; }
+    }
+
+    .info-card {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .info-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 8px;
+    }
+    .info-label { color: var(--text-dim); }
+    .info-val { font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+
+    .badge-2fa {
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .badge-2fa.enabled { background: var(--success-bg); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.4); }
+    .badge-2fa.disabled { background: var(--warning-bg); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.4); }
+
+    /* SQLI LAB */
+    .lab-box {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .code-block {
+      background: #040810;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #7dd3fc;
+      overflow-x: auto;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- HEADER -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">🔐</div>
+        <div class="brand-text">
+          <h1>Vault<span>Key</span></h1>
+          <p class="tagline">Production-Grade Authentication with bcrypt, SQLi Defense &amp; TOTP 2FA</p>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <nav class="nav-tabs" id="navTabs">
+        <button class="tab-btn active" id="tabLoginBtn" onclick="switchTab('login')">Sign In</button>
+        <button class="tab-btn" id="tabRegisterBtn" onclick="switchTab('register')">Register</button>
+        <button class="tab-btn hidden" id="tabDashBtn" onclick="switchTab('dashboard')">User Profile</button>
+        <button class="tab-btn" id="tabSqlLabBtn" onclick="switchTab('sqli-lab')">🛡️ SQLi Defense Lab</button>
+      </nav>
+    </header>
+
+    <!-- STATUS BANNER (Dynamic) -->
+    <div id="globalBanner" class="banner banner-danger hidden"></div>
+
+    <!-- VIEW 1: SIGN IN -->
+    <section id="viewLogin" class="card">
+      <div class="form-box">
+        <h2 class="form-title">Welcome Back</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Sign in with your verified credentials</p>
+
+        <form id="loginForm" onsubmit="handleLogin(event)" style="display:flex; flex-direction:column; gap:16px;">
+          
+          <div class="form-group">
+            <label for="loginEmail">Email Address</label>
+            <input id="loginEmail" type="email" class="input-field" placeholder="user@example.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <div class="input-wrapper">
+              <input id="loginPassword" type="password" class="input-field" placeholder="••••••••" required>
+              <button type="button" class="toggle-pass" onclick="togglePassVisibility('loginPassword')">👁️</button>
+            </div>
+          </div>
+
+          <!-- 2FA STEP (Appears if user has 2FA enabled) -->
+          <div class="form-group hidden" id="totpSection">
+            <label for="loginTotp" style="color: var(--warning);">⚡ Two-Factor Code (2FA)</label>
+            <input id="loginTotp" type="text" class="input-field" placeholder="6-digit code (e.g. 123456)" maxlength="6" style="letter-spacing: 0.3em; font-family: monospace; font-size: 1.2rem; text-align: center;">
+            <span style="font-size: 0.78rem; color: var(--text-dim);">Enter the active code from your authenticator app.</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary full" id="submitLoginBtn">
+            <span>Sign In</span>
+          </button>
+        </form>
+
+        <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted);">
+          Don't have an account? <a href="#" onclick="switchTab('register')" style="color: var(--primary); font-weight:700;">Create one</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- VIEW 2: REGISTER -->
+    <section id="viewRegister" class="card hidden">
+      <div class="form-box">
+        <h2 class="form-title">Create Secure Account</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Protected with salted bcrypt password hashing</p>
+
+        <form id="registerForm" onsubmit="handleRegister(event)" style="display:flex; flex-direction:column; gap:16px;">
+          
+          <div class="form-group">
+            <label for="regUsername">Username</label>
+            <input id="regUsername" type="text" class="input-field" placeholder="e.g. alex_rivera" required>
+            <span style="font-size: 0.75rem; color: var(--text-dim);">Alphanumeric, hyphens, and underscores only.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="regEmail">Email Address</label>
+            <input id="regEmail" type="email" class="input-field" placeholder="alex@example.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="regPassword">Password</label>
+            <div class="input-wrapper">
+              <input id="regPassword" type="password" class="input-field" placeholder="Minimum 8 characters" oninput="checkStrength(this.value)" required>
+              <button type="button" class="toggle-pass" onclick="togglePassVisibility('regPassword')">👁️</button>
+            </div>
+            
+            <!-- Live Password Strength Meter -->
+            <div class="strength-meter">
+              <div class="strength-track">
+                <div id="strengthBar" class="strength-bar"></div>
+              </div>
+              <div class="strength-label">
+                <span id="strengthText">Password strength</span>
+                <span id="strengthScore">0/4</span>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary full" id="submitRegBtn">
+            <span>Register Account</span>
+          </button>
+        </form>
+
+        <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted);">
+          Already have an account? <a href="#" onclick="switchTab('login')" style="color: var(--primary); font-weight:700;">Sign in</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- VIEW 3: PROTECTED USER DASHBOARD -->
+    <section id="viewDashboard" class="card hidden">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border);">
+        <div>
+          <h2 style="font-size: 1.6rem; font-weight: 800;">Authenticated Session</h2>
+          <p style="color: var(--text-muted); font-size: 0.85rem;">Protected by HTTP-only encrypted session cookie</p>
+        </div>
+        <button class="btn btn-danger" onclick="handleLogout()">🚪 Logout</button>
+      </div>
+
+      <div class="profile-grid">
+        
+        <!-- User Account Info -->
+        <article class="info-card">
+          <h3>User Account Details</h3>
+          <div class="info-row"><span class="info-label">User ID:</span><span class="info-val" id="dashUserId">#1</span></div>
+          <div class="info-row"><span class="info-label">Username:</span><span class="info-val" id="dashUsername">alex</span></div>
+          <div class="info-row"><span class="info-label">Email:</span><span class="info-val" id="dashEmail">alex@example.com</span></div>
+          <div class="info-row"><span class="info-label">Two-Factor Status:</span><span id="dash2faBadge" class="badge-2fa disabled">Disabled</span></div>
+          <div class="info-row"><span class="info-label">Member Since:</span><span class="info-val" id="dashCreatedAt">2026-10-04</span></div>
+        </article>
+
+        <!-- 2FA Setup Card -->
+        <article class="info-card" id="twoFactorCard">
+          <h3>Two-Factor Authentication (2FA)</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">
+            Add an extra layer of protection using standard RFC 6238 TOTP (Google/Microsoft Authenticator).
+          </p>
+          
+          <div id="setup2faArea">
+            <button class="btn btn-secondary" id="btnInit2fa" onclick="initiate2faSetup()">⚡ Setup TOTP 2FA</button>
+          </div>
+
+          <div id="verify2faArea" class="hidden" style="display:flex; flex-direction:column; gap:10px;">
+            <div class="banner banner-warning">
+              Scan this secret key or enter it manually in your Authenticator App:
+            </div>
+            <div style="background:#040810; padding:10px; border-radius:8px; font-family:monospace; font-size:1.1rem; text-align:center; color:#38bdf8;" id="secretDisplay">
+              ABCD-EFGH-IJKL-MNOP
+            </div>
+            <input id="confirmTotpCode" type="text" class="input-field" placeholder="Enter 6-digit code to confirm" maxlength="6" style="text-align:center; font-family:monospace;">
+            <button class="btn btn-primary" onclick="confirm2faActivation()">Verify &amp; Enable 2FA</button>
+          </div>
+
+          <div id="active2faArea" class="hidden">
+            <div class="banner banner-success">✅ Two-Factor Authentication is currently ACTIVE on this account.</div>
+            <button class="btn btn-secondary" style="margin-top:10px;" onclick="disable2fa()">Disable 2FA</button>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- VIEW 4: SQL INJECTION DEFENSE LAB -->
+    <section id="viewSqlLab" class="card hidden">
+      <div class="lab-box">
+        <div>
+          <h2 style="font-size: 1.5rem; font-weight: 800;">🛡️ SQL Injection Defense Interactive Lab</h2>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Test malicious input payloads against our parameterized queries to verify that SQL syntax context is never escaped.
+          </p>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="preset-btn" onclick="testPayload(&quot;' OR '1'='1&quot;)">Payload 1: ' OR '1'='1</button>
+          <button class="preset-btn" onclick="testPayload(&quot;admin'--&quot;)">Payload 2: admin'--</button>
+          <button class="preset-btn" onclick="testPayload(&quot;' UNION SELECT 1, 'hacked', 'x'--&quot;)">Payload 3: UNION SELECT</button>
+        </div>
+
+        <div class="form-group">
+          <label>Test Payload Input</label>
+          <input id="sqliInput" type="text" class="input-field" value="' OR '1'='1" style="font-family: 'JetBrains Mono', monospace;">
+        </div>
+
+        <button class="btn btn-primary" onclick="runSqliTest()">Run Defense Test</button>
+
+        <div id="sqliResults" class="hidden" style="display:flex; flex-direction:column; gap:12px; margin-top:12px;">
+          <div>
+            <span style="font-size:0.8rem; font-weight:700; color:var(--danger);">VULNERABLE QUERY (Raw Concatenation would produce):</span>
+            <div class="code-block" id="vulnerableQueryCode">SELECT * FROM users WHERE email = '' OR '1'='1'</div>
+          </div>
+
+          <div>
+            <span style="font-size:0.8rem; font-weight:700; color:var(--success);">SECURE PARAMETERIZED QUERY (Executed by Driver):</span>
+            <div class="code-block" id="secureQueryCode">SELECT * FROM users WHERE email = ?</div>
+          </div>
+
+          <div class="banner banner-success" id="sqliExplanation">
+            Database treated the input strictly as a literal text parameter. Zero data was leaked.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    let activeUser = null;
+    let pending2faEmail = null;
+
+    function showBanner(msg, type = "danger") {
+      const b = document.getElementById('globalBanner');
+      b.className = `banner banner-${type}`;
+      b.innerText = msg;
+      b.classList.remove('hidden');
+      setTimeout(() => b.classList.add('hidden'), 5000);
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById('viewLogin').classList.add('hidden');
+      document.getElementById('viewRegister').classList.add('hidden');
+      document.getElementById('viewDashboard').classList.add('hidden');
+      document.getElementById('viewSqlLab').classList.add('hidden');
+
+      if (tab === 'login') {
+        document.getElementById('tabLoginBtn').classList.add('active');
+        document.getElementById('viewLogin').classList.remove('hidden');
+      } else if (tab === 'register') {
+        document.getElementById('tabRegisterBtn').classList.add('active');
+        document.getElementById('viewRegister').classList.remove('hidden');
+      } else if (tab === 'dashboard') {
+        document.getElementById('tabDashBtn').classList.add('active');
+        document.getElementById('viewDashboard').classList.remove('hidden');
+      } else if (tab === 'sqli-lab') {
+        document.getElementById('tabSqlLabBtn').classList.add('active');
+        document.getElementById('viewSqlLab').classList.remove('hidden');
+      }
+    }
+
+    function togglePassVisibility(id) {
+      const el = document.getElementById(id);
+      el.type = el.type === "password" ? "text" : "password";
+    }
+
+    function checkStrength(p) {
+      let score = 0;
+      if (p.length >= 8) score++;
+      if (/[A-Z]/.test(p) && /[a-z]/.test(p)) score++;
+      if (/[0-9]/.test(p)) score++;
+      if (/[!@#$%^&*(),.?":{}|<>]/.test(p)) score++;
+
+      const bar = document.getElementById('strengthBar');
+      const text = document.getElementById('strengthText');
+      const scoreText = document.getElementById('strengthScore');
+      scoreText.innerText = `${score}/4`;
+
+      if (score <= 1) {
+        bar.style.width = "25%";
+        bar.style.background = "#ef4444";
+        text.innerText = "Weak";
+      } else if (score === 2) {
+        bar.style.width = "50%";
+        bar.style.background = "#f59e0b";
+        text.innerText = "Fair";
+      } else if (score === 3) {
+        bar.style.width = "75%";
+        bar.style.background = "#3b82f6";
+        text.innerText = "Good";
+      } else {
+        bar.style.width = "100%";
+        bar.style.background = "#10b981";
+        text.innerText = "Strong";
+      }
+    }
+
+    // AUTH API CALLS
+    async function handleRegister(e) {
+      e.preventDefault();
+      const username = document.getElementById('regUsername').value;
+      const email = document.getElementById('regEmail').value;
+      const password = document.getElementById('regPassword').value;
+
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ username, email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showBanner(data.detail || "Registration failed", "danger");
+          return;
+        }
+        showBanner("Account created successfully! Please sign in.", "success");
+        switchTab('login');
+        document.getElementById('loginEmail').value = email;
+      } catch (err) {
+        showBanner("Network error during registration", "danger");
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      const totp_code = document.getElementById('loginTotp').value.trim();
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ email, password, totp_code })
+        });
+        const data = await res.json();
+
+        if (res.status === 202 && data.requires_2fa) {
+          document.getElementById('totpSection').classList.remove('hidden');
+          document.getElementById('loginTotp').focus();
+          showBanner("2FA is enabled on this account. Enter your 6-digit authenticator code.", "warning");
+          return;
+        }
+
+        if (!res.ok) {
+          showBanner(data.detail || "Invalid login credentials", "danger");
+          return;
+        }
+
+        activeUser = data.user;
+        renderDashboard(activeUser);
+        switchTab('dashboard');
+        showBanner("Signed in securely!", "success");
+      } catch (err) {
+        showBanner("Network error during sign in", "danger");
+      }
+    }
+
+    async function handleLogout() {
+      await fetch('/api/logout', { method: 'POST' });
+      activeUser = null;
+      document.getElementById('tabDashBtn').classList.add('hidden');
+      document.getElementById('loginForm').reset();
+      document.getElementById('totpSection').classList.add('hidden');
+      switchTab('login');
+      showBanner("Logged out and session terminated.", "success");
+    }
+
+    function renderDashboard(user) {
+      document.getElementById('tabDashBtn').classList.remove('hidden');
+      document.getElementById('dashUserId').innerText = `#${user.id}`;
+      document.getElementById('dashUsername').innerText = user.username;
+      document.getElementById('dashEmail').innerText = user.email;
+      document.getElementById('dashCreatedAt').innerText = (user.created_at || "").slice(0, 10);
+      
+      const badge = document.getElementById('dash2faBadge');
+      if (user.two_factor_enabled) {
+        badge.className = "badge-2fa enabled";
+        badge.innerText = "Enabled";
+        document.getElementById('setup2faArea').classList.add('hidden');
+        document.getElementById('verify2faArea').classList.add('hidden');
+        document.getElementById('active2faArea').classList.remove('hidden');
+      } else {
+        badge.className = "badge-2fa disabled";
+        badge.innerText = "Disabled";
+        document.getElementById('setup2faArea').classList.remove('hidden');
+        document.getElementById('verify2faArea').classList.add('hidden');
+        document.getElementById('active2faArea').classList.add('hidden');
+      }
+    }
+
+    async function initiate2faSetup() {
+      const res = await fetch('/api/2fa/setup', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) return showBanner(data.detail, "danger");
+      document.getElementById('secretDisplay').innerText = data.secret;
+      document.getElementById('setup2faArea').classList.add('hidden');
+      document.getElementById('verify2faArea').classList.remove('hidden');
+    }
+
+    async function confirm2faActivation() {
+      const code = document.getElementById('confirmTotpCode').value.trim();
+      const res = await fetch('/api/2fa/verify-enable', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ code })
+      });
+      const data = await res.json();
+      if (!res.ok) return showBanner(data.detail, "danger");
+      showBanner("2FA Activated Successfully!", "success");
+      activeUser.two_factor_enabled = 1;
+      renderDashboard(activeUser);
+    }
+
+    async function disable2fa() {
+      if (!confirm("Are you sure you want to disable 2FA?")) return;
+      const res = await fetch('/api/2fa/disable', { method: 'POST' });
+      if (!res.ok) return showBanner("Failed to disable 2FA", "danger");
+      activeUser.two_factor_enabled = 0;
+      renderDashboard(activeUser);
+      showBanner("2FA has been disabled.", "warning");
+    }
+
+    // Check existing session on load
+    async function checkSession() {
+      try {
+        const res = await fetch('/api/me');
+        if (res.ok) {
+          const data = await res.json();
+          activeUser = data.user;
+          renderDashboard(activeUser);
+          switchTab('dashboard');
+        }
+      } catch (e) {}
+    }
+
+    function testPayload(p) {
+      document.getElementById('sqliInput').value = p;
+      runSqliTest();
+    }
+
+    async function runSqliTest() {
+      const payload = document.getElementById('sqliInput').value;
+      const res = await fetch('/api/sqli-test', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ payload })
+      });
+      const data = await res.json();
+      document.getElementById('sqliResults').classList.remove('hidden');
+      document.getElementById('vulnerableQueryCode').innerText = data.vulnerable_pattern_example;
+      document.getElementById('secureQueryCode').innerText = data.secure_parameterized_query;
+      document.getElementById('sqliExplanation').innerText = data.explanation;
+    }
+
+    window.onload = checkSession;
+  </script>
+</body>
+</html>
